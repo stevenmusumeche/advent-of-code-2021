@@ -2,21 +2,29 @@ import { linesToArray } from "../input";
 
 export function runA(inputPath: string): any {
   const grid = parseInput(inputPath);
-  let riskScore = 0;
-  for (let r = 0; r < grid.length; r++) {
-    for (let c = 0; c < grid[0].length; c++) {
-      const val = grid[r][c];
-      const adjacent = getAdjacentIndexes(r, c, grid);
-      const isLowest = adjacent.every((a) => grid[a[0]][a[1]] > val);
-      if (isLowest) {
-        riskScore += val + 1;
-      }
-    }
-  }
-  return riskScore;
+  const lowPoints = findLowPoints(grid);
+  return lowPoints.reduce((acc, cur) => {
+    return (acc += grid[cur[0]][cur[1]] + 1);
+  }, 0);
 }
 
 export function runB(inputPath: string): any {}
+
+function findLowPoints(grid: Grid): Point[] {
+  const lowPoints: Point[] = [];
+  for (let r = 0; r < grid.length; r++) {
+    for (let c = 0; c < grid[0].length; c++) {
+      const val = grid[r][c];
+      const adjacent = getAdjacentValues(r, c, grid);
+      const isLowest = adjacent.every((a) => a > val);
+      if (isLowest) {
+        lowPoints.push([r, c]);
+      }
+    }
+  }
+
+  return lowPoints;
+}
 
 function getAdjacentValues(row: number, col: number, grid: Grid): number[] {
   const points = getAdjacentIndexes(row, col, grid);
