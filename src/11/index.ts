@@ -12,7 +12,18 @@ export function runA(inputPath: string): any {
   return numFlashes;
 }
 
-export function runB(inputPath: string): any {}
+export function runB(inputPath: string): any {
+  const grid = buildGridFromInput(inputPath);
+  const gridSize = grid.length * grid[0].length;
+  let numFlashes = 0;
+  let iterations = 0;
+  while (numFlashes !== gridSize) {
+    iterations++;
+    numFlashes = iterate(grid);
+  }
+
+  return iterations;
+}
 
 function buildGridFromInput(inputPath: string): Grid {
   return linesToArray(inputPath).map((x) =>
