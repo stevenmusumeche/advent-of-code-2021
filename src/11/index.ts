@@ -1,17 +1,12 @@
 import { linesToArray } from "../input";
 
 export function runA(inputPath: string): any {
-  const grid: Grid = linesToArray(inputPath).map((x) =>
-    x.split("").map((x) => ({ val: Number(x) }))
-  );
+  const grid = buildGridFromInput(inputPath);
 
   let numFlashes = 0;
   const NUM_ITERATIONS = 100;
   for (let it = 0; it < NUM_ITERATIONS; it++) {
-    // console.log("After step", it + 1);
-    iterate(grid);
-    numFlashes += getFlashes(grid).length;
-    // drawGrid(grid);
+    numFlashes += iterate(grid);
   }
 
   return numFlashes;
@@ -19,13 +14,19 @@ export function runA(inputPath: string): any {
 
 export function runB(inputPath: string): any {}
 
-function iterate(grid: Grid) {
+function buildGridFromInput(inputPath: string): Grid {
+  return linesToArray(inputPath).map((x) =>
+    x.split("").map((x) => ({ val: Number(x) }))
+  );
+}
+
+function iterate(grid: Grid): number {
   // first increment everything by 1
   incrementGrid(grid);
 
   // add values to points adjacent to flashes
   let flashes = getFlashes(grid);
-  applyFlashes(grid, flashes);
+  return applyFlashes(grid, flashes);
 }
 
 function getAdjacentPoints(point: Point, grid: Grid): Point[] {
@@ -49,8 +50,11 @@ function isOnGrid(point: Point, grid: Grid) {
   return r >= 0 && r < grid.length && c >= 0 && c < grid[0].length;
 }
 
-function applyFlashes(grid: Grid, flashes: Point[]): void {
-  if (flashes.length === 0) return;
+/**
+ * Recursively apply flashes
+ */
+function applyFlashes(grid: Grid, flashes: Point[]): number {
+  if (flashes.length === 0) return 0;
 
   const newFlashes: Point[] = [];
   flashes.forEach((flashPoint) => {
@@ -63,9 +67,7 @@ function applyFlashes(grid: Grid, flashes: Point[]): void {
     });
   });
 
-  if (newFlashes.length > 0) {
-    applyFlashes(grid, newFlashes);
-  }
+  return flashes.length + applyFlashes(grid, newFlashes);
 }
 
 function getFlashes(grid: Grid): Point[] {
