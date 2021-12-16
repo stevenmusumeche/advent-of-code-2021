@@ -8,10 +8,10 @@ const symbols = new Map([
 ]);
 
 const closers = new Map([
-  [")", { val: 3 }],
-  ["]", { val: 57 }],
-  ["}", { val: 1197 }],
-  [">", { val: 25137 }],
+  [")", { val1: 3, val2: 1 }],
+  ["]", { val1: 57, val2: 2 }],
+  ["}", { val1: 1197, val2: 3 }],
+  [">", { val1: 25137, val2: 4 }],
 ]);
 
 export function runA(inputPath: string): any {
@@ -21,7 +21,7 @@ export function runA(inputPath: string): any {
     .map((line) => {
       const invalidIndex = findFirstIllegalCharIndex(line);
       if (invalidIndex) {
-        return closers.get(line[invalidIndex])?.val;
+        return closers.get(line[invalidIndex])?.val1;
       }
 
       return;
@@ -33,7 +33,39 @@ export function runA(inputPath: string): any {
   }, 0);
 }
 
-export function runB(inputPath: string): any {}
+export function runB(inputPath: string): any {
+  const lines = linesToArray(inputPath);
+
+  const validLines = lines.filter((line) => {
+    return !findFirstIllegalCharIndex(line);
+  });
+
+  const closingChars = validLines.map(completeValidLine);
+
+  const lineScores = closingChars
+    .map((line) => {
+      return line.reduce((acc, cur) => {
+        return acc * 5 + closers.get(cur)!.val2;
+      }, 0);
+    })
+    .sort((a, b) => a - b);
+
+  return lineScores[Math.floor(lineScores.length / 2)];
+}
+
+function completeValidLine(line: string): string[] {
+  const stack = [];
+  for (let i = 0; i < line.length; i++) {
+    const val = line[i];
+    if (isCloser(val)) {
+      stack.pop();
+    } else {
+      stack.push(val);
+    }
+  }
+
+  return stack.reverse().map((opener) => symbols.get(opener)!.closer);
+}
 
 function findFirstIllegalCharIndex(line: string): number | void {
   const stack = [];
